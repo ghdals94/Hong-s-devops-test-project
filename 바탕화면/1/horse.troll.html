@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>가은아 달려라! 경마 게임</title>
+    <style>
+        .track { width: 800px; border-bottom: 2px solid black; position: relative; height: 50px; margin: 10px auto; }
+        .horse { position: absolute; left: 0; font-size: 30px; transition: left 0.1s linear; }
+        #result { font-size: 24px; font-weight: bold; color: red; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>우리집배 (수정가능) 경마내기 🐎</h1>
+    <div class="track"><div id="horse1" class="horse">🏇가은</div></div>
+    <div class="track"><div id="horse2" class="horse">🏇홍민</div></div>
+    <div class="track"><div id="horse3" class="horse">🏇친구</div></div>
+    <button onclick="startRace()">경기 시작!</button>
+    <div id="result"></div>
+
+    <script>
+        function startRace() {
+            // 경마 로직: 가은이가 이기면 축하, 지면 조롱 멘트!
+            console.log("Race Started!");
+        }
+    </script>
+</body>
+</html>

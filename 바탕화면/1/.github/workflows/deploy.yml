@@ -1,0 +1,32 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            # 1. 서버 기존 컨테이너 제거
+            sudo docker stop prod-web-server dev-web-server || true
+            sudo docker rm prod-web-server dev-web-server || true
+            
+            # 2. 컨테이너 새로 띄우기
+            sudo docker run -d -p 8080:80 --name prod-web-server nginx
+            sudo docker run -d -p 8081:80 --name dev-web-server nginx
+            
+            # 3. 파일 강제 주입
+            sleep 2
+            sudo docker exec prod-web-server sh -c "echo '<h1>Hong-s Minesweeper (Updated!)</h1>' > /usr/share/nginx/html/index.html"
+            sudo docker exec dev-web-server sh -c "echo '<h1>Gaeun-s Racing Game (Updated!)</h1>' > /usr/share/nginx/html/index.html"
