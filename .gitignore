@@ -1,0 +1,15 @@
+.cache/
+.config/
+.gnupg/
+.local/
+.ssh/
+snap/
+문서/
+바탕화면/
+사진/
+.bash*
+.profile
+.pam_environment
+.sudo_as_admin_successful
+.wget-hsts
+*.pem

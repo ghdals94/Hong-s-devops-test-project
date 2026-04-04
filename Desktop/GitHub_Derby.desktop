@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Hong's Derby Repo
+Comment=Go to GitHub Repository
+Exec=xdg-open https://github.com/
+Icon=/home/janghongmin/github_icon.png
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;

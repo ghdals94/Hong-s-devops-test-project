@@ -1,8 +1,50 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>가은아 달려라!</title></head>
-<body style="text-align:center;">
-<h1>🏇 가은아 달려라! 경마 게임 (Deployed!)</h1>
-<p>가은이 이름이 들어간 경마 게임 페이지입니다.</p>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>가은아 달려라! 경마 게임</title>
+    <style>
+        body { background: #222; color: #fff; text-align: center; font-family: 'Jua', sans-serif; }
+        .track { width: 90%; max-width: 1000px; border-bottom: 3px dashed #fff; position: relative; height: 80px; margin: 15px auto; background: #333; border-radius: 10px; }
+        .horse { position: absolute; left: 0; font-size: 50px; transition: left 0.1s linear; filter: drop-shadow(0 0 5px #fff); }
+        .finish-line { position: absolute; right: 50px; top: 0; bottom: 0; width: 10px; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px); }
+        #result { font-size: 30px; margin-top: 20px; padding: 20px; border-radius: 15px; display: none; }
+        .win-gaeun { background: #ff69b4; color: #fff; }
+        .lose-gaeun { background: #444; color: #ff0; }
+        button { padding: 15px 40px; font-size: 24px; cursor: pointer; border-radius: 50px; border: none; background: #0f0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🐎 우리집배 (가은이 설거지 내기) 경마 🐎</h1>
+    <div class="track"><div class="finish-line"></div><div id="h1" class="horse">🏇가은</div></div>
+    <div class="track"><div class="finish-line"></div><div id="h2" class="horse">🏇홍민</div></div>
+    <div class="track"><div class="finish-line"></div><div id="h3" class="horse">🏇친구</div></div>
+    <button onclick="startRace()">🚀 경기 시작!</button>
+    <div id="result"></div>
+    <script>
+        function startRace() {
+            const res = document.getElementById('result');
+            res.style.display = 'none';
+            let pos = [0, 0, 0];
+            const names = ["가은", "홍민", "친구"];
+            const game = setInterval(() => {
+                for(let i=0; i<3; i++) {
+                    pos[i] += Math.random() * 60;
+                    document.getElementById('h' + (i+1)).style.left = pos[i] + 'px';
+                    if(pos[i] >= 900) {
+                        clearInterval(game);
+                        res.style.display = 'block';
+                        if(i === 0) {
+                            res.className = 'win-gaeun';
+                            res.innerText = "🎉 역시 가은이가 1등! 홍민이는 평생 설거지해라! 🎉";
+                        } else {
+                            res.className = 'lose-gaeun';
+                            res.innerText = "🤣 " + names[i] + " 승리! 가은아... 밥이나 해와라 🤣";
+                        }
+                    }
+                }
+            }, 100);
+        }
+    </script>
 </body>
 </html>

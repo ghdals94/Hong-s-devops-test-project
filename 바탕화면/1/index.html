@@ -1,17 +1,170 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Hong's Minesweeper</title></head>
-<body style="text-align:center; background:#eee;">
-<h1>💣 Hong's 50x50 Minesweeper (Deployed!)</h1>
-<div id="board" style="display:grid; grid-template-columns:repeat(50, 15px); gap:1px; margin:0 auto; width:fit-content;"></div>
+<head>
+    <meta charset="UTF-8">
+    <title>Hong's Test minesweeper v1.1</title>
+    <style>
+        :root { --bg: #f3f3f3; --win-bg: rgba(255, 255, 255, 0.85); --accent: #0067c0; }
+        body { 
+            background: linear-gradient(135deg, #c3d9ea 0%, #e0eafc 100%);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; font-family: 'Segoe UI Variable', sans-serif;
+        }
+        .window { 
+            background: var(--win-bg); backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.4); border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12); padding-bottom: 15px;
+        }
+        .title-bar { padding: 12px 20px; font-weight: 600; font-size: 14px; color: #333; }
+        .status-area { 
+            background: rgba(255,255,255,0.6); margin: 0 15px 10px 15px;
+            padding: 10px 20px; display: flex; justify-content: space-between;
+            align-items: center; border-radius: 8px; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .digit-box { font-size: 22px; font-weight: 700; color: var(--accent); min-width: 75px; text-align: center; }
+        #face { 
+            width: 38px; height: 38px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        #board { 
+            display: grid; grid-template-columns: repeat(50, 20px); 
+            margin: 0 15px; background: #bbb; border-radius: 4px; gap: 1px;
+            border: 1px solid #aaa;
+        }
+        .cell { 
+            width: 20px; height: 20px; background: #ffffff;
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 13px; font-weight: 900; cursor: pointer;
+        }
+        .cell:hover { background: #f0f0f0; }
+        .cell.revealed { background: #e8e8e8 !important; cursor: default; }
+
+        /* XP 정통 숫자 색상 가이드 */
+        .n1 { color: #0000FF !important; } /* 1: Blue */
+        .n2 { color: #008000 !important; } /* 2: Green */
+        .n3 { color: #FF0000 !important; } /* 3: Red */
+        .n4 { color: #000080 !important; } /* 4: Dark Blue */
+        .n5 { color: #800000 !important; } /* 5: Dark Red/Maroon */
+        .n6 { color: #008080 !important; } /* 6: Teal */
+        .n7 { color: #000000 !important; } /* 7: Black */
+        .n8 { color: #808080 !important; } /* 8: Gray */
+        
+        .cell.mine { background: #ff4d4d !important; }
+        .cell.mine::after { content: '💣'; font-size: 12px; }
+        .cell.flag::after { content: '🚩'; font-size: 11px; }
+    </style>
+</head>
+<body>
+<div class="window">
+    <div class="title-bar"><span>Hong's Test minesweeper</span></div>
+    <div class="status-area">
+        <div id="mine-count" class="digit-box">400</div>
+        <div id="face" onclick="location.reload()">😊</div>
+        <div id="timer" class="digit-box">00:00</div>
+    </div>
+    <div id="board"></div>
+</div>
 <script>
-const board = document.getElementById('board');
-for(let i=0; i<2500; i++) {
-const cell = document.createElement('div');
-cell.style.width = '15px'; cell.style.height = '15px';
-cell.style.background = '#ccc'; cell.style.border = '1px solid #999';
-board.appendChild(cell);
-}
+    const size = 50, mineTotal = 400;
+    let cells = [], gameStarted = false, isGameOver = false, timer;
+    const board = document.getElementById('board');
+
+    function init() {
+        for(let i=0; i<size*size; i++) {
+            const el = document.createElement('div');
+            el.className = 'cell';
+            el.onmousedown = (e) => handleMouse(i, e);
+            board.appendChild(el);
+            cells.push({ el, isMine: false, isRevealed: false, isFlagged: false, x: i%size, y: Math.floor(i/size) });
+        }
+    }
+
+    function plantMines(safeIdx) {
+        let planted = 0;
+        while(planted < mineTotal) {
+            let r = Math.floor(Math.random() * (size * size));
+            if(!cells[r].isMine && r !== safeIdx) {
+                cells[r].isMine = true; planted++;
+            }
+        }
+    }
+
+    function handleMouse(i, e) {
+        if(isGameOver) return;
+        if(!gameStarted && (e.button === 0)) {
+            plantMines(i);
+            gameStarted = true;
+            let seconds = 0;
+            timer = setInterval(() => { 
+                seconds++;
+                const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+                const sec = String(seconds % 60).padStart(2, '0');
+                document.getElementById('timer').innerText = min + ':' + sec; 
+            }, 1000);
+        }
+        if((e.buttons === 3) || (e.button === 1)) {
+            chord(i);
+        } else if(e.button === 0) {
+            reveal(i);
+        } else if(e.button === 2) {
+            if(!cells[i].isRevealed) {
+                cells[i].isFlagged = !cells[i].isFlagged;
+                cells[i].el.classList.toggle('flag');
+                updateMineCount();
+            }
+        }
+    }
+
+    function reveal(i) {
+        let c = cells[i];
+        if(c.isRevealed || c.isFlagged || isGameOver) return;
+        c.isRevealed = true;
+        c.el.classList.add('revealed');
+        if(c.isMine) {
+            gameOver(i); return;
+        }
+        const neighbors = getNeighbors(i);
+        const mCount = neighbors.filter(n => cells[n].isMine).length;
+        if(mCount > 0) {
+            c.el.innerText = mCount;
+            c.el.classList.add('n' + mCount);
+        } else {
+            neighbors.forEach(n => reveal(n));
+        }
+    }
+
+    function chord(i) {
+        let c = cells[i];
+        if(!c.isRevealed) return;
+        const neighbors = getNeighbors(i);
+        const mineCount = neighbors.filter(n => cells[n].isMine).length;
+        const flagCount = neighbors.filter(n => cells[n].isFlagged).length;
+        if(mineCount === flagCount) neighbors.forEach(n => { if(!cells[n].isFlagged && !cells[n].isRevealed) reveal(n); });
+    }
+
+    function getNeighbors(i) {
+        let {x, y} = cells[i], res = [];
+        for(let dy=-1; dy<=1; dy++) for(let dx=-1; dx<=1; dx++) {
+            let nx = x+dx, ny = y+dy;
+            if(nx>=0 && nx<size && ny>=0 && ny<size && !(dx==0 && dy==0)) res.push(ny*size+nx);
+        }
+        return res;
+    }
+
+    function updateMineCount() {
+        const flags = cells.filter(c => c.isFlagged).length;
+        document.getElementById('mine-count').innerText = Math.max(0, mineTotal - flags);
+    }
+
+    function gameOver(hitIdx) {
+        isGameOver = true; clearInterval(timer);
+        document.getElementById('face').innerText = '😵';
+        cells.forEach((c, idx) => { if(c.isMine) { c.el.classList.add('revealed', 'mine'); if(idx === hitIdx) c.el.style.backgroundColor = '#ff4d4d'; } });
+    }
+    document.oncontextmenu = () => false;
+    init();
 </script>
 </body>
 </html>
